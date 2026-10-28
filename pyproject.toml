@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "soclog"
+version = "0.1.0"
+description = "Offline CLI that triages Linux auth, web access, and Windows Security logs"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Lawrence Tshabalala" }]
+keywords = ["security", "soc", "logs", "mitre-attack", "detection"]
+
+[tool.setuptools.packages.find]
+include = ["soclog*"]
+
+[tool.setuptools.package-data]
+soclog = ["rules.json"]

@@ -1,0 +1,11 @@
+# SYNTHETIC Windows Security CSV. Not from a real host. RFC 5737 addresses only.
+TimeCreated,EventID,Computer,TargetUserName,SubjectUserName,IpAddress,LogonType,MemberName,GroupName,CommandLine
+2026-10-27T10:00:00Z,4624,win-demo,ops,-,192.0.2.25,3,,,
+2026-10-27T16:00:00Z,4625,win-demo,guest,-,192.0.2.10,3,,,
+2026-10-27T17:00:00Z,4625,win-demo,guest,-,198.51.100.90,3,,,
+2026-10-27T17:00:10Z,4625,win-demo,finance,-,198.51.100.90,3,,,
+2026-10-27T17:00:20Z,4625,win-demo,hr,-,198.51.100.90,3,,,
+2026-10-27T17:00:30Z,4625,win-demo,sales,-,198.51.100.90,3,,,
+2026-10-27T17:00:40Z,4625,win-demo,intern,-,198.51.100.90,3,,,
+2026-10-27T17:00:50Z,4625,win-demo,reception,-,198.51.100.90,3,,,
+2026-10-27T17:30:00Z,4720,win-demo,tempadmin,Administrator,-,3,,,

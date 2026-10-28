@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Run the demo
+        # Exit code 1 means the rules fired. The synthetic samples are built to do that.
+        # Any other non-zero code is a failure.
+        run: |
+          set +e
+          python -m soclog demo --report "$RUNNER_TEMP/demo-report.md"
+          code=$?
+          if [ "$code" -eq 1 ]; then
+            echo "Demo reported findings, which these samples are built to produce."
+            exit 0
+          fi
+          echo "Demo exited $code; expected 1 (findings) or a clean run."
+          exit "$code"
