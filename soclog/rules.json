@@ -1,0 +1,339 @@
+{
+  "version": 1,
+  "description": "Heuristic triage rules for soclog. Thresholds are starting points that make the synthetic samples fire and a single mistyped password stay quiet. They are not a baseline for a real network. Timestamps are treated as UTC.",
+  "rules": [
+    {
+      "id": "auth-brute-force",
+      "type": "count_threshold",
+      "title": "Repeated failed logons for {user} from {src_ip}",
+      "severity": "high",
+      "mitre_id": "T1110.001",
+      "mitre_name": "Brute Force: Password Guessing",
+      "event_types": [
+        "ssh_failed",
+        "win_logon_failed"
+      ],
+      "group_by": [
+        "src_ip",
+        "user"
+      ],
+      "require_fields": [
+        "src_ip",
+        "user"
+      ],
+      "threshold": 5,
+      "window_seconds": 600,
+      "suppress_if_covered_by": "success-after-failures",
+      "recommendation": "Check whether this account exists and whether the source is a scanner or someone who should be logging in. Five failures in ten minutes is only a threshold: a mistyped password can look the same. If the source is not recognised, block it and see whether a successful logon followed."
+    },
+    {
+      "id": "password-spray",
+      "type": "distinct_threshold",
+      "title": "Password spraying from {src_ip} against {users} accounts",
+      "severity": "high",
+      "mitre_id": "T1110.003",
+      "mitre_name": "Brute Force: Password Spraying",
+      "event_types": [
+        "ssh_failed",
+        "win_logon_failed"
+      ],
+      "group_by": [
+        "src_ip"
+      ],
+      "distinct_field": "user",
+      "require_fields": [
+        "src_ip",
+        "user"
+      ],
+      "min_distinct": 5,
+      "max_per_value": 4,
+      "window_seconds": 600,
+      "suppress_if_covered_by": "success-after-failures",
+      "recommendation": "One source tried a small number of passwords against several accounts. Compare the account list with people who work here before locking accounts. If the source is not a known gateway or VPN, block it and look for a later success from the same address."
+    },
+    {
+      "id": "success-after-failures",
+      "type": "success_after_failures",
+      "title": "Successful logon for {user} from {src_ip} after repeated failures",
+      "spray_title": "Successful logon for {user} from {src_ip} after password spraying",
+      "severity": "critical",
+      "mitre_id": "T1110.001",
+      "mitre_name": "Brute Force: Password Guessing",
+      "spray_mitre_id": "T1110.003",
+      "spray_mitre_name": "Brute Force: Password Spraying",
+      "spray_min_distinct": 5,
+      "spray_max_per_value": 4,
+      "failure_types": [
+        "ssh_failed",
+        "win_logon_failed"
+      ],
+      "success_types": [
+        "ssh_success",
+        "win_logon_success"
+      ],
+      "threshold": 5,
+      "window_seconds": 600,
+      "recommendation": "A logon succeeded after repeated failures from the same source. Treat that session as untrusted until someone confirms it was expected. Reset the password for the account that got in, review what it did next, and block the source if you do not recognise it. If many different accounts failed first, this fits password spraying (T1110.003) rather than guessing against one account (T1110.001)."
+    },
+    {
+      "id": "unusual-hours",
+      "type": "unusual_hours",
+      "title": "Successful logon for {user} from {src_ip} during unusual hours",
+      "severity": "low",
+      "mitre_id": "T1078",
+      "mitre_name": "Valid Accounts",
+      "event_types": [
+        "ssh_success",
+        "win_logon_success"
+      ],
+      "group_by": [
+        "user",
+        "src_ip"
+      ],
+      "start_hour": 22,
+      "end_hour": 5,
+      "window_seconds": 43200,
+      "recommendation": "This logon falls between 22:00 and 05:00 UTC, about 00:00 to 07:00 in South Africa (SAST, UTC+2, no daylight saving). The tool does not know this account's normal hours. Ask whether this person or job is supposed to authenticate then. On its own this is not evidence of compromise. Mapping it to T1078 only means an existing account was used."
+    },
+    {
+      "id": "local-user-created",
+      "type": "match",
+      "title": "Local account {user} was created",
+      "severity": "medium",
+      "mitre_id": "T1136.001",
+      "mitre_name": "Create Account: Local Account",
+      "event_types": [
+        "user_created"
+      ],
+      "recommendation": "A local account was created with useradd or adduser. Confirm there is a change ticket and that the account is not an extra administrator. If nobody expected it, disable the account and look for the process that created it."
+    },
+    {
+      "id": "windows-user-created",
+      "type": "match",
+      "title": "Windows account {user} was created",
+      "severity": "medium",
+      "mitre_id": "T1136",
+      "mitre_name": "Create Account",
+      "event_types": [
+        "win_user_created"
+      ],
+      "recommendation": "Event 4720 means an account was created. It does not say whether the account is local or domain-wide. On a domain controller this is often a domain account (T1136.002), so the alert stays on the parent technique T1136. Confirm who created it and whether it was requested. If not, disable it."
+    },
+    {
+      "id": "privileged-group-add",
+      "type": "match",
+      "title": "{user} was added to {group}",
+      "severity": "high",
+      "mitre_id": "T1098.007",
+      "mitre_name": "Account Manipulation: Additional Local or Domain Groups",
+      "event_types": [
+        "group_membership"
+      ],
+      "field_regex": {
+        "group": "(?i)^(?:[^\\\\]+\\\\)?(sudo|wheel|admin|root|administrators|domain admins|enterprise admins|schema admins)$"
+      },
+      "recommendation": "This account was added to a group that can administer the host or the domain (sudo, wheel, Administrators, Domain Admins, and similar). Confirm the change was requested. If it was not, remove the membership and review other actions by the account that made the change. Adding someone to an ordinary group such as Users does not raise this alert."
+    },
+    {
+      "id": "audit-log-cleared",
+      "type": "match",
+      "title": "Windows audit log cleared",
+      "severity": "critical",
+      "mitre_id": "T1070.001",
+      "mitre_name": "Indicator Removal: Clear Windows Event Logs",
+      "event_types": [
+        "audit_log_cleared"
+      ],
+      "recommendation": "Event 1102 means the Windows audit log was cleared. That removes evidence of earlier actions on this host. Identify who cleared it and keep any other copy of the log (a collector, a backup, or a forwarded copy) before it ages out."
+    },
+    {
+      "id": "encoded-powershell",
+      "type": "regex",
+      "title": "Encoded PowerShell command for {user}",
+      "severity": "high",
+      "mitre_id": "T1059.001",
+      "mitre_name": "Command and Scripting Interpreter: PowerShell",
+      "event_types": [
+        "process",
+        "sudo_command"
+      ],
+      "fields": [
+        "command"
+      ],
+      "pattern": "(?i)(?:-encodedcommand\\b|-enc(?:odedcommand)?\\s+[A-Za-z0-9+/=]{8,}|frombase64string\\s*\\()",
+      "recommendation": "The command line uses PowerShell's encoded-command switch or FromBase64String. Installers sometimes do this too, so decode it on a machine you trust and compare the parent process with what you expect. Do not run the decoded script to see what it does."
+    },
+    {
+      "id": "shell-pipe-download",
+      "type": "regex",
+      "title": "Shell command piped from curl or wget for {user}",
+      "severity": "high",
+      "mitre_id": "T1059.004",
+      "mitre_name": "Command and Scripting Interpreter: Unix Shell",
+      "event_types": [
+        "process",
+        "sudo_command"
+      ],
+      "fields": [
+        "command"
+      ],
+      "pattern": "(?i)\\b(?:curl|wget)\\b[^|\\n]{0,200}\\|\\s*(?:sudo\\s+)?(?:ba)?sh\\b",
+      "recommendation": "A command downloads content and pipes it into a shell. That runs whatever the URL returns. Find which account did it and what changed afterwards. If you do not recognise the URL, isolate the host. This is mapped to Unix shell (T1059.004), not PowerShell, because the pipe targets sh or bash."
+    },
+    {
+      "id": "wget-to-tmp",
+      "type": "regex",
+      "title": "wget wrote a file under /tmp for {user}",
+      "severity": "high",
+      "mitre_id": "T1105",
+      "mitre_name": "Ingress Tool Transfer",
+      "event_types": [
+        "process",
+        "sudo_command"
+      ],
+      "fields": [
+        "command"
+      ],
+      "pattern": "(?i)\\bwget\\b.{0,160}(?:-O|--output-document)(?:\\s+|=)\\s*/tmp/",
+      "recommendation": "wget was told to save a file under /tmp. wget is a normal admin tool, so check the URL and who ran it. If you do not recognise the URL, quarantine the file and do not execute it. This program does not contact the URL."
+    },
+    {
+      "id": "curl-to-tmp",
+      "type": "regex",
+      "title": "curl wrote a file under /tmp for {user}",
+      "severity": "high",
+      "mitre_id": "T1105",
+      "mitre_name": "Ingress Tool Transfer",
+      "event_types": [
+        "process",
+        "sudo_command"
+      ],
+      "fields": [
+        "command"
+      ],
+      "pattern": "(?i)\\bcurl\\b.{0,160}(?:-o|--output)(?:\\s+|=)\\s*/tmp/",
+      "recommendation": "curl was told to save a file under /tmp. Check the URL and the account. A download into /tmp from an address you do not recognise is worth quarantining. This program does not contact the URL."
+    },
+    {
+      "id": "certutil-download",
+      "type": "regex",
+      "title": "certutil downloaded a file for {user}",
+      "severity": "high",
+      "mitre_id": "T1105",
+      "mitre_name": "Ingress Tool Transfer",
+      "event_types": [
+        "process",
+        "sudo_command"
+      ],
+      "fields": [
+        "command"
+      ],
+      "pattern": "(?i)\\bcertutil(?:\\.exe)?\\b.{0,120}-urlcache\\b",
+      "recommendation": "certutil -urlcache was used to download a file. Windows admins sometimes use certutil for legitimate downloads, and so do intruders. Check the URL and the destination path. certutil -hashfile does not match this rule. This program does not contact the URL."
+    },
+    {
+      "id": "powershell-download",
+      "type": "regex",
+      "title": "PowerShell download command for {user}",
+      "severity": "high",
+      "mitre_id": "T1105",
+      "mitre_name": "Ingress Tool Transfer",
+      "event_types": [
+        "process",
+        "sudo_command"
+      ],
+      "fields": [
+        "command"
+      ],
+      "pattern": "(?i)(?:\\bdownload(?:string|file)\\s*\\(|\\b(?:invoke-webrequest|iwr)\\b.{0,80}\\s-outfile\\b)",
+      "recommendation": "PowerShell was used to download a file (DownloadString, DownloadFile, or Invoke-WebRequest -OutFile). MITRE lists these under Ingress Tool Transfer (T1105). Decode or read the URL on a machine you trust, and do not run the downloaded file to test it."
+    },
+    {
+      "id": "web-sqli",
+      "type": "regex",
+      "title": "Possible SQL injection from {src_ip}",
+      "severity": "high",
+      "mitre_id": "T1190",
+      "mitre_name": "Exploit Public-Facing Application",
+      "event_types": [
+        "http_request"
+      ],
+      "fields": [
+        "path"
+      ],
+      "pattern": "(?i)(?:union(?:\\s|%20|\\+)+select|(?:'|%27)(?:\\s|%20|\\+)*or(?:\\s|%20|\\+)|(?:\\bor\\b|\\band\\b)(?:\\s|%20|\\+)+['\\\"]?\\d|information_schema|benchmark\\s*\\(|sleep\\s*\\()",
+      "recommendation": "The request contains a pattern often used for SQL injection. It may be a scan rather than a successful exploit. Check the application response and whether the database shows anything unexpected. Block the source if this site should not be receiving it."
+    },
+    {
+      "id": "web-traversal",
+      "type": "regex",
+      "title": "Possible path traversal from {src_ip}",
+      "severity": "high",
+      "mitre_id": "T1190",
+      "mitre_name": "Exploit Public-Facing Application",
+      "event_types": [
+        "http_request"
+      ],
+      "fields": [
+        "path"
+      ],
+      "pattern": "(?i)(?:\\.\\./|\\.\\.\\\\|%2e%2e%2f|%2e%2e/|%2e%2e%5c|/etc/passwd|\\\\etc\\\\passwd|win\\.ini|boot\\.ini)",
+      "recommendation": "The request tries to walk outside the web root or read a well-known file such as /etc/passwd. Check whether the server actually returned file contents. If it did, treat the host as exposed and patch the application."
+    },
+    {
+      "id": "web-xss",
+      "type": "regex",
+      "title": "Possible cross-site scripting payload from {src_ip}",
+      "severity": "high",
+      "mitre_id": "T1190",
+      "mitre_name": "Exploit Public-Facing Application",
+      "event_types": [
+        "http_request"
+      ],
+      "fields": [
+        "path"
+      ],
+      "pattern": "(?i)(?:<script|%3cscript|javascript\\s*:|onerror\\s*=|onload\\s*=)",
+      "recommendation": "The request contains a script or event-handler payload. See whether the application stored it or reflected it. If it is only a probe that returned an error, record the source and watch for a follow-up."
+    },
+    {
+      "id": "web-scanner-ua",
+      "type": "regex",
+      "title": "Scanner user agent from {src_ip}",
+      "severity": "medium",
+      "mitre_id": "T1595.002",
+      "mitre_name": "Active Scanning: Vulnerability Scanning",
+      "event_types": [
+        "http_request"
+      ],
+      "fields": [
+        "user_agent"
+      ],
+      "pattern": "(?i)(?:sqlmap|nikto|nmap|masscan|dirbuster|gobuster|nuclei|wpscan|acunetix|nessus|zgrab|zmeu)",
+      "recommendation": "The user agent matches a vulnerability or content scanner such as sqlmap, Nikto, or Nmap. A scanner is reconnaissance (T1595.002), not proof that an exploit worked. Block or rate-limit the source if this site should not be scanned, and read the other requests it made."
+    },
+    {
+      "id": "web-404-burst",
+      "type": "count_threshold",
+      "title": "Burst of {count} HTTP 404 responses from {src_ip}",
+      "severity": "medium",
+      "mitre_id": "T1595.003",
+      "mitre_name": "Active Scanning: Wordlist Scanning",
+      "event_types": [
+        "http_request"
+      ],
+      "where": {
+        "status": 404
+      },
+      "group_by": [
+        "src_ip"
+      ],
+      "require_fields": [
+        "src_ip"
+      ],
+      "threshold": 12,
+      "window_seconds": 300,
+      "recommendation": "This client received many 404 responses in a few minutes, which is what directory and file wordlists look like (T1595.003). Confirm it is not a broken link checker you run yourself. If the paths include admin pages, backups, or .env, treat it as reconnaissance and block the source if you do not recognise it."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+# SYNTHETIC combined access log. Not from a real site.
+# Addresses are RFC 5737 documentation ranges. No real accounts or people.
+
+# Ordinary browsing, including a few 404s that stay under the wordlist threshold.
+192.0.2.10 - - [27/Oct/2026:09:00:00 +0000] "GET / HTTP/1.1" 200 2048 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0"
+192.0.2.10 - - [27/Oct/2026:09:00:05 +0000] "GET /about HTTP/1.1" 200 1800 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0"
+192.0.2.10 - - [27/Oct/2026:09:00:08 +0000] "GET /search?q=status HTTP/1.1" 200 900 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0"
+192.0.2.10 - - [27/Oct/2026:09:00:12 +0000] "GET /shop?id=1 HTTP/1.1" 200 1200 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0"
+192.0.2.10 - - [27/Oct/2026:09:00:16 +0000] "GET /shop?order=date HTTP/1.1" 200 1100 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0"
+192.0.2.10 - - [27/Oct/2026:09:01:00 +0000] "GET /missing-page HTTP/1.1" 404 196 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0"
+192.0.2.10 - - [27/Oct/2026:09:01:02 +0000] "GET /favicon.ico HTTP/1.1" 404 0 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0"
+192.0.2.10 - - [27/Oct/2026:09:01:04 +0000] "GET /old-banner.png HTTP/1.1" 404 0 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0"
+198.51.100.15 - - [27/Oct/2026:09:30:00 +0000] "GET / HTTP/1.1" 200 2048 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+198.51.100.15 - - [27/Oct/2026:09:30:04 +0000] "GET /contact HTTP/1.1" 200 800 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+# Payloads and scanner user agents from one client.
+203.0.113.50 - - [27/Oct/2026:12:00:00 +0000] "GET /search?q=1%27%20OR%201%3D1 HTTP/1.1" 500 400 "-" "sqlmap/1.7"
+203.0.113.50 - - [27/Oct/2026:12:00:05 +0000] "GET /items?id=1+UNION+SELECT+1,2,3 HTTP/1.1" 500 400 "-" "sqlmap/1.7"
+203.0.113.50 - - [27/Oct/2026:12:00:20 +0000] "GET /download?file=../../etc/passwd HTTP/1.1" 400 180 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:00:30 +0000] "GET /comment?q=%3Cscript%3Ealert(1)%3C/script%3E HTTP/1.1" 200 300 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:00:40 +0000] "GET /robots.txt HTTP/1.1" 200 80 "-" "Nikto/2.1.6"
+
+# Wordlist: 14 missing paths inside a few minutes. Threshold is 12.
+203.0.113.50 - - [27/Oct/2026:12:02:00 +0000] "GET /.env HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:04 +0000] "GET /admin HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:08 +0000] "GET /wp-login.php HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:12 +0000] "GET /backup.zip HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:16 +0000] "GET /.git/config HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:20 +0000] "GET /server-status HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:24 +0000] "GET /phpmyadmin HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:28 +0000] "GET /config.php HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:32 +0000] "GET /owa HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:36 +0000] "GET /remote/login HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:40 +0000] "GET /cgi-bin/ HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:44 +0000] "GET /sitemap.xml.bak HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:48 +0000] "GET /test.php HTTP/1.1" 404 196 "-" "Mozilla/5.0"
+203.0.113.50 - - [27/Oct/2026:12:02:52 +0000] "GET /old/ HTTP/1.1" 404 196 "-" "Mozilla/5.0"
